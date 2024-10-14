@@ -8,7 +8,7 @@ Developer setup:
 - Download insomnia for hitting endpoints manually
 
 Running:
-- (first time) `npm install`
+- (first time) `npm install package.json`
 - Start local server `nodemon node .`
 - Stop local server with `Ctrl+C`
 - Force stop local server: `sudo kill -9 $(lsof -ti :8080)`
