@@ -13,14 +13,8 @@ const verifyFirebaseToken = async (req, res, next) => {
       return res.status(401).json({ error: "No authorization header" });
     }
 
-    if (!authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Invalid authorization header format, should be: Bearer <User ID token>" });
-    }
-
-    const idToken = authHeader.split("Bearer ")[1];
-
-    console.log(`Authenticating with token: ${idToken}`);
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    console.log(`Authenticating with token: ${authHeader}`);
+    const decodedToken = await admin.auth().verifyIdToken(authHeader);
 
     // Add the decoded token to the request object for use in route handlers
     req.user = decodedToken;
