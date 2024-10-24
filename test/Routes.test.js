@@ -1,5 +1,5 @@
 const request = require('supertest');
-const routes = require('../../Routes');
+const routes = require('../src/App');
 
 const api = request(routes);
 
