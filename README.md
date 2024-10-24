@@ -19,4 +19,4 @@ Testing:
 - `npm test`
 
 Notes: 
-- Running in "dev" mode disables auth so you can curl, run in "prod" when testing frontend with auth
+- Running in "dev" mode disables auth so you can curl locally

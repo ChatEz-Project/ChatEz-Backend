@@ -2,7 +2,7 @@
   "name": "chatez-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "Routes.js",
+  "main": "src/App.js",
   "scripts": {
     "test": "jest test"
   },

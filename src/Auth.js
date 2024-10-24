@@ -1,12 +1,4 @@
-const express = require("express");
-const userController = require("./src/user/Controller");
-const dotenv = require('dotenv');
-const admin = require('firebase-admin');
-const cors = require("cors");
-
-// Load environment variables
-const environment = process.env.NODE_ENV || 'prod';
-dotenv.config({ path: `.env.${environment}` });
+const admin = require("firebase-admin");
 
 // Initialize Firebase
 admin.initializeApp({
@@ -27,6 +19,7 @@ const verifyFirebaseToken = async (req, res, next) => {
 
     const idToken = authHeader.split("Bearer ")[1];
 
+    console.log(`Authenticating with token: ${idToken}`);
     const decodedToken = await admin.auth().verifyIdToken(idToken);
 
     // Add the decoded token to the request object for use in route handlers
@@ -39,27 +32,6 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 };
 
-// Create Express app
-const app = express();
-
-// Middleware
-app.use(cors({
-  origin: "http://localhost:3000"
-}));
-app.use(express.json());
-if (process.env.AUTH_ENABLED === "true") {
-  app.use(verifyFirebaseToken)
-}
-
-// Routes
-app.post("/addFriend/:email", userController.addFriend);
-
-// Server start
-if (require.main === module) {
-  const PORT = process.env.RUN_ON_PORT || 8080;
-  app.listen(PORT, () => {
-    console.log(`Server started on port http://localhost:${PORT} in ${environment}`);
-  });
-}
-
-module.exports = app;
+module.exports = {
+  verifyFirebaseToken
+};
