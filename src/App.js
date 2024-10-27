@@ -5,12 +5,11 @@ const express = require("express");
 const dotenv = require('dotenv');
 const cors = require("cors");
 
-// Load environment variables
 const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
 
-// Create Express app
 const app = express();
+
 
 // Middleware
 app.use(cors({
@@ -18,11 +17,14 @@ app.use(cors({
 }));
 app.use(express.json());
 if (process.env.AUTH_ENABLED === "true") {
-  app.use(Auth.verifyFirebaseToken)
+  app.use(Auth.verifyFirebaseToken) //this triggers implicit user status update
 }
+
 
 // Routes
 app.post("/addFriend/:email", UserController.addFriend);
+app.patch("/checkUserExists/:email", UserController.userExists)
+
 
 // Server start
 if (require.main === module) {
