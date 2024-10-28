@@ -1,13 +1,7 @@
-const admin = require("firebase-admin");
+const admin = require("./FirebaseAdmin").admin;
 const dotenv = require("dotenv");
 const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
-
-// Initialize Firebase
-admin.initializeApp({
-  projectId: process.env.PROJECT_ID,
-  credential: admin.credential.applicationDefault()
-});
 
 const verifyFirebaseToken = async (req, res, next) => {
   try {
@@ -17,11 +11,11 @@ const verifyFirebaseToken = async (req, res, next) => {
       return res.status(401).json({ error: "No authorization header" });
     }
 
-    console.log(`Authenticating with token: ${authHeader}`);
-    const decodedToken = await admin.auth().verifyIdToken(authHeader);
-
+    console.log(`Authenticating incoming request with token: ${authHeader}`);
+    const email = (await admin.auth().verifyIdToken(authHeader)).email;
+    console.log(`Successfully Authenticated: ${email}`);
     // Add the decoded token to the request object for use in route handlers
-    req.user = decodedToken;
+    req.user = email;
 
     next();
   } catch (error) {
