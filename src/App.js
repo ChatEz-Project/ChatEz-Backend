@@ -17,7 +17,7 @@ app.use(cors({
 }));
 app.use(express.json());
 if (process.env.AUTH_ENABLED === "true") {
-  app.use(Auth.verifyFirebaseToken) //this triggers implicit user status update
+  app.use(Auth.verifyFirebaseToken)
 }
 
 

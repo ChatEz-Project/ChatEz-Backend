@@ -5,22 +5,18 @@ const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
 
 async function userExists(email)  {
-  console.log(`Checking if ${email} exists`)
+  console.log(`Checking if ${email} exists in users`)
+
   try {
-    const snapshot = await db
+    const res = await db
       .collection("users")
       .where("email", "==", email)
-      .limit(1)
       .get()
 
-    if (snapshot.empty) {
-      return false
-    } else {
-      return true
-    }
+    return !res.empty;
   } catch (error){
     console.error("Error when executing userExists", error)
-    throw error
+    return false
   }
 }
 

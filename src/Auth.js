@@ -11,11 +11,11 @@ const verifyFirebaseToken = async (req, res, next) => {
       return res.status(401).json({ error: "No authorization header" });
     }
 
-    console.log(`Authenticating with token: ${authHeader}`);
-    const decodedToken = await admin.auth().verifyIdToken(authHeader);
-
+    console.log(`Authenticating incoming request with token: ${authHeader}`);
+    const email = (await admin.auth().verifyIdToken(authHeader)).email;
+    console.log(`Successfully Authenticated: ${email}`);
     // Add the decoded token to the request object for use in route handlers
-    req.user = decodedToken;
+    req.user = email;
 
     next();
   } catch (error) {
