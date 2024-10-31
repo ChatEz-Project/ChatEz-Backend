@@ -16,15 +16,14 @@ app.use(cors({
   origin: `http://localhost:${process.env.FRONTEND_PORT}`,
 }));
 app.use(express.json());
-if (process.env.AUTH_ENABLED === "true") {
+if(process.env.ENABLE_CUSTOM_MIDDLEWARE == "true") {
   app.use(Auth.verifyFirebaseToken)
+  app.use(UserController.updateLastActive)
 }
 
 
 // Routes
-app.post("/addFriend/:email", UserController.addFriend);
-app.patch("/checkUserExists/:email", UserController.userExists)
-
+app.patch("/getUser", UserController.getUser);
 
 // Server start
 if (require.main === module) {
