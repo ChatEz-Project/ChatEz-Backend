@@ -12,6 +12,5 @@ if (admin.apps[0] == undefined) { // check if exists so no more than 1 instance 
 }
 
 module.exports = {
-  admin: admin,
-  db   : admin.firestore()
+  admin: admin
 };

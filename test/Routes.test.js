@@ -1,20 +1,38 @@
 const request = require('supertest');
+const UserConnector = require('../src/user/Connector');
+const User = require('../src/user/Model');
 const routes = require('../src/App');
+const {testOnlyDeleteAll} = require("../src/user/Connector");
+const mongoose = require('mongoose');
 
 const api = request(routes);
 
-describe("Test /addFriend/:email", () => {
-    test("adds friend", () => {
-        return api
-            .post("/addFriend/test@example.com")
-            .send({ friendEmail: "a@x.com" })
-            .expect(200);
-    });
+describe("Test /getUser", () => {
+  beforeAll(async () => {
+    await UserConnector.insertUser(new User({ email: 'test@example.com' }));
+  });
 
-    test("fails on invalid email", () => {
-        return api
-            .post("/addFriend/invalid-email")
-            .send({ friendEmail: "x.com" })
-            .expect(400);
-    });
+  afterAll(async () => {
+    await testOnlyDeleteAll()
+    await mongoose.connection.close()
+  });
+
+  test("should get the user", async () => {
+    const response = await api.patch("/getUser")
+                              .set({'userEmail': "test@example.com"}) //simulate auth implicitly setting email
+
+    expect(response.status).toBe(200);
+
+    const { __v, _id, ...userWithoutMeta } = response.body; //remove db fields
+    expect(userWithoutMeta).toEqual(
+      {
+      email      : 'test@example.com',
+      displayName: 'test@example.com',
+      lastActive : response.body.lastActive, //copy from res as not possible to test
+      language   : process.env.DEFAULT_LANGUAGE,
+      friendList : [],
+      photoUrl   : process.env.DEFAULT_PROFILE_IMAGE
+      }
+    );
+  });
 });

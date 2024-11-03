@@ -15,7 +15,7 @@ const verifyFirebaseToken = async (req, res, next) => {
     const email = (await admin.auth().verifyIdToken(authHeader)).email;
     console.log(`Successfully Authenticated: ${email}`);
     // Add the decoded token to the request object for use in route handlers
-    req.user = email;
+    req.userEmail = email;
 
     next();
   } catch (error) {
