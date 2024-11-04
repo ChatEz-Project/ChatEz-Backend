@@ -1,8 +1,8 @@
-const request = require('supertest');
 const UserConnector = require('../src/user/Connector');
 const User = require('../src/user/Model');
 const routes = require('../src/App');
-const {testOnlyDeleteAll} = require("../src/user/Connector");
+
+const request = require('supertest');
 const mongoose = require('mongoose');
 
 const api = request(routes);
@@ -13,7 +13,7 @@ describe("Test /getUser", () => {
   });
 
   afterAll(async () => {
-    await testOnlyDeleteAll()
+    await UserConnector.testOnlyDeleteAll()
     await mongoose.connection.close()
   });
 

@@ -13,6 +13,8 @@ const getUser = async (req, res) => {
     email = req.userEmail;
   }
 
+  console.log(`Getting user ${email}`);
+
   try {
     const user = await UserConnector.getUser(email)
     if (user !== null ) {

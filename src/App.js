@@ -1,5 +1,6 @@
 const UserController = require("./user/Controller");
 const Auth = require("./Auth");
+const logRequest = require("./ReqLogger");
 
 const express = require("express");
 const dotenv = require('dotenv');
@@ -12,6 +13,7 @@ const app = express();
 
 
 // Middleware
+app.use(logRequest);
 app.use(cors({
   origin: `http://localhost:${process.env.FRONTEND_PORT}`,
 }));
