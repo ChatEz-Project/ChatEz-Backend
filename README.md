@@ -19,4 +19,5 @@ Testing:
 - `NODE_ENV=test npm test`
 
 Notes: 
-- Running in "dev" mode disables auth
+- Running in "dev" or "test" uses test database
+- Running in "test" mode also disables auth and lastActive middleware
