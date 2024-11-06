@@ -74,6 +74,12 @@ async function updateFriendList(email, friendList) {
   }catch(err){console.error(err); throw err; }
 }
 
+async function getFriendListUsers(friendList){
+  try{
+    return await User.find({email:{ $in: friendList}})
+  }catch(err){console.error(err); throw err; }
+}
+
 async function testOnlyDeleteAll() {
   try{
     return await User.deleteMany();
@@ -88,6 +94,7 @@ module.exports = {
   updateUser,
   updateFriendList,
   updateLastActive,
+  getFriendListUsers,
   testOnlyDeleteAll,
   connectToDatabase
 }

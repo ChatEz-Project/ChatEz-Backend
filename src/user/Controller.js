@@ -80,8 +80,55 @@ const makeFriends = async (req, res) => {
 const addFriend = async (userEmail, friendEmail) => {
   const user = await UserConnector.getUser(userEmail)
   const result = await UserConnector.updateFriendList(userEmail, [...user.friendList, friendEmail].sort())
-  console.log(`added ${friendEmail} to ${userEmail}, friend list is now ${result.friendList}`)
+  console.log(`added friend ${friendEmail} to ${userEmail}, friend list is now ${result.friendList}`)
   return result
+}
+
+const breakFriends = async(req, res) => {
+  const { friendEmail } = req.params;
+  const clientEmail = getClientEmail(req);
+  // const friendEmail = req.query.email
+
+  try{
+    const client = await UserConnector.getUser(clientEmail);
+    if (client == null){
+      return res.status(404).send(`Email: ${friendEmail} is not a user`);
+    }
+    if(!client.friendList.includes(friendEmail)){
+      return res.status(400).send(`Already NOT friends with ${friendEmail}`);
+    }
+    if(friendEmail == clientEmail){
+      return res.status(400).send(`Cannot unfriend yourself`);
+    }
+
+    await removeFriend(clientEmail, friendEmail);
+    await removeFriend(friendEmail, clientEmail);
+    return res.status(200).send("Successfully unfriended");
+
+  }catch (err) {
+    console.error(err);
+    return res.status(400).json({ error: `Server Error: ${err}` });
+  }
+}
+
+const removeFriend = async (userEmail, friendEmail) => {
+  const user = await UserConnector.getUser(userEmail)
+  const result = await UserConnector.updateFriendList(userEmail, user.friendList.filter(friend => friend !== friendEmail))
+  console.log(`removed ${friendEmail} from ${userEmail}, friend list is now ${result.friendList}`)
+  return result
+}
+
+const getFriends = async (req, res) => {
+  const email = getClientEmail(req)
+
+  try{
+    const user = await UserConnector.getUser(email)
+    const friends = await UserConnector.getFriendListUsers(user.friendList)
+    res.status(200).send(friends)
+  }catch (err){
+    console.error(err);
+    return res.status(400).json({ error: `Server Error: ${err}` });
+  }
 }
 
 const getClientEmail = (req) => {
@@ -95,5 +142,7 @@ const getClientEmail = (req) => {
 module.exports = {
   getUser,
   updateLastActive,
-  makeFriends
+  makeFriends,
+  breakFriends,
+  getFriends
 };

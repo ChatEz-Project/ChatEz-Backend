@@ -5,8 +5,11 @@ const User = require('../../src/user/Model');
 const mongoose = require('mongoose');
 
 describe("Test UserController", () => {
-
   describe("Test updateLastActive", () => {
+    beforeAll(async () => {
+      await UserConnector.connectToDatabase()
+    })
+
     afterAll(async () => {
       await UserConnector.testOnlyDeleteAll()
       await mongoose.connection.close()
