@@ -54,6 +54,32 @@ async function updateUser(userModel){
   }
 }
 
+async function updateLastActive(email){
+  try{
+    return await User.findOneAndUpdate(
+      {email:email},
+      {lastActive: Date.now()},
+      {new: true}
+    );
+  }catch(err){console.error(err); throw err; }
+}
+
+async function updateFriendList(email, friendList) {
+  try{
+    return await User.findOneAndUpdate(
+      {email:email},
+      {friendList: friendList},
+      {new: true}
+    );
+  }catch(err){console.error(err); throw err; }
+}
+
+async function getFriendListUsers(friendList){
+  try{
+    return await User.find({email:{ $in: friendList}})
+  }catch(err){console.error(err); throw err; }
+}
+
 async function testOnlyDeleteAll() {
   try{
     return await User.deleteMany();
@@ -66,5 +92,9 @@ module.exports = {
   getUser,
   insertUser,
   updateUser,
+  updateFriendList,
+  updateLastActive,
+  getFriendListUsers,
   testOnlyDeleteAll,
+  connectToDatabase
 }

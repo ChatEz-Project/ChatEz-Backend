@@ -5,6 +5,7 @@ const logRequest = require("./ReqLogger");
 const express = require("express");
 const dotenv = require('dotenv');
 const cors = require("cors");
+require('console-stamp')(console, '[HH:MM:ss.l]');
 
 const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
@@ -26,6 +27,10 @@ if(process.env.ENABLE_CUSTOM_MIDDLEWARE == "true") {
 
 // Routes
 app.patch("/getUser", UserController.getUser);
+
+app.patch("/addFriend/:friendEmail"   , UserController.makeFriends) //will friend both instantly
+app.patch("/getFriends"               , UserController.getFriends)
+app.patch("/removeFriend/:friendEmail", UserController.breakFriends);
 
 // Server start
 if (require.main === module) {

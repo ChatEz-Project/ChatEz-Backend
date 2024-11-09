@@ -10,7 +10,7 @@ const userSchema = new Schema({
   displayName: {type: String, default: function() { return this.email; }},
   lastActive : {type: Date  , default: Date.now},
   language   : {type: String, default: process.env.DEFAULT_LANGUAGE},
-  friendList : {type: Array , default: []},
+  friendList : {type: [String] , default: []},
   photoUrl   : {type: String, default: `${process.env.DEFAULT_PROFILE_IMAGE}`},
 });
 
