@@ -24,6 +24,15 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 };
 
+const getClientEmail = (req) => {
+  if (process.env.NODE_ENV === 'test') { //needed to switch between headers set by test and prod
+    return req.headers.useremail //test header
+  }else{
+    return req.userEmail; //header when running normally
+  }
+}
+
 module.exports = {
-  verifyFirebaseToken
+  verifyFirebaseToken,
+  getClientEmail
 };

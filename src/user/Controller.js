@@ -1,15 +1,14 @@
 const UserConnector = require("./Connector");
 const User = require("./Model")
+const Auth = require("../Auth");
 
 const dotenv = require('dotenv');
 const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
 
 const getUser = async (req, res) => {
-  const email = getClientEmail(req)
-
+  const email = Auth.getClientEmail(req)
   console.log(`Getting user ${email}`);
-
   try {
     const user = await UserConnector.getUser(email)
     if (user !== null ) {
@@ -19,12 +18,12 @@ const getUser = async (req, res) => {
     }
   }catch(err) {
     console.error(err);
-    return res.status(400).json({ error: `Server Error: ${err}` });
+    return res.status(500).json({ error: `Server Error: ${err}` });
   }
 };
 
 const updateLastActive = async (req, res, next) => {
-  const email = req.userEmail //acquired from auth
+  const email = req.userEmail;
   try {
     const userModel = await UserConnector.getUser(email)
     if ((userModel !== null)) {
@@ -52,8 +51,7 @@ const updateLastActive = async (req, res, next) => {
 
 const makeFriends = async (req, res) => {
   const { friendEmail } = req.params;
-  const clientEmail = getClientEmail(req);
-  // const friendEmail = req.query.email
+  const clientEmail = Auth.getClientEmail(req)
 
   try{
     const client = await UserConnector.getUser(clientEmail);
@@ -63,7 +61,7 @@ const makeFriends = async (req, res) => {
     if(client.friendList.includes(friendEmail)){
       return res.status(400).send(`Already friends with ${friendEmail} <3`);
     }
-    if(friendEmail == clientEmail){
+    if(friendEmail === clientEmail){
       return res.status(400).send(`Cannot add yourself as your friend`);
     }
 
@@ -73,7 +71,7 @@ const makeFriends = async (req, res) => {
 
   }catch (err) {
     console.error(err);
-    return res.status(400).json({ error: `Server Error: ${err}` });
+    return res.status(500).json({ error: `Server Error: ${err}` });
   }
 }
 
@@ -86,8 +84,7 @@ const addFriend = async (userEmail, friendEmail) => {
 
 const breakFriends = async(req, res) => {
   const { friendEmail } = req.params;
-  const clientEmail = getClientEmail(req);
-  // const friendEmail = req.query.email
+  const clientEmail = Auth.getClientEmail(req)
 
   try{
     const client = await UserConnector.getUser(clientEmail);
@@ -97,7 +94,7 @@ const breakFriends = async(req, res) => {
     if(!client.friendList.includes(friendEmail)){
       return res.status(400).send(`Already NOT friends with ${friendEmail}`);
     }
-    if(friendEmail == clientEmail){
+    if(friendEmail === clientEmail){
       return res.status(400).send(`Cannot unfriend yourself`);
     }
 
@@ -107,7 +104,7 @@ const breakFriends = async(req, res) => {
 
   }catch (err) {
     console.error(err);
-    return res.status(400).json({ error: `Server Error: ${err}` });
+    return res.status(500).json({ error: `Server Error: ${err}` });
   }
 }
 
@@ -119,7 +116,7 @@ const removeFriend = async (userEmail, friendEmail) => {
 }
 
 const getFriends = async (req, res) => {
-  const email = getClientEmail(req)
+  const email = Auth.getClientEmail(req)
 
   try{
     const user = await UserConnector.getUser(email)
@@ -127,15 +124,7 @@ const getFriends = async (req, res) => {
     res.status(200).send(friends)
   }catch (err){
     console.error(err);
-    return res.status(400).json({ error: `Server Error: ${err}` });
-  }
-}
-
-const getClientEmail = (req) => {
-  if (process.env.NODE_ENV === 'test') { //needed to switch between headers set by test and prod
-    return req.headers.useremail
-  }else{
-    return req.userEmail;
+    return res.status(500).json({ error: `Server Error: ${err}` });
   }
 }
 

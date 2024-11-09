@@ -20,4 +20,4 @@ Testing:
 
 Notes: 
 - Running in "dev" or "test" uses test database
-- Running in "test" mode also disables auth and lastActive middleware
+- Running in "test" mode also disables auth and lastActive middleware, needed when doing npm test
