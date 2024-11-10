@@ -1,5 +1,6 @@
 const MessageConnector = require("./MongoConnector");
 const FirebaseStorageConnector = require("./FirebaseStorageConnector");
+const UserConnector = require("../user/Connector");
 const Message = require("./Model")
 const Auth = require("../Auth");
 
@@ -8,32 +9,52 @@ const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
 
 const sendMessage = async (req, res) => {
-  const sender = Auth.getClientEmail(req);
-
   try{
+    const sender = Auth.getClientEmail(req);
     const { recipient } = req.params;
     const messageContent = req.body.message;
 
-    let fileRef = null;
+    if (!messageContent) {
+      return res.status(400).send('Message content required in body');
+    }
+
+    if(await UserConnector.getUser(recipient) == null){
+      return res.status(404).send(`recipient ${recipient} not found`);
+    }
+
+    let fileUrl = null;
     if(req.file != null){
-      fileRef = await FirebaseStorageConnector.uploadFileToFirebase(req.file, sender);
-      console.log(fileRef);
+      fileUrl = await FirebaseStorageConnector.uploadFileToFirebase(req.file, sender);
+      console.log(`uploaded file: ${fileUrl}`);
     }
 
     const message = new Message({
-      sender: sender,
+      sender   : sender,
       recipient: recipient,
-      fileRef: fileRef,
-      message: messageContent
+      fileUrl  : fileUrl,
+      message  : messageContent
     })
 
     await MessageConnector.storeNewMessage(message)
-    res.status(200).send("Message sent successfully");
+    return res.status(200).send("Message sent successfully");
   }catch(err){
-    res.status(500).send(`Server Error: ${err}`);
+    return res.status(500).send(`Server Error: ${err}`);
+  }
+}
+
+const getMessages = async (req, res) => {
+  try{
+    const client = Auth.getClientEmail(req);
+    console.log(`Getting messages for ${client}`);
+    const messages = await MessageConnector.getUserMessages(client);
+    return res.status(200).send(messages);
+  }catch (err){
+    console.error(err);
+    return res.status(500).send(`Server Error: ${err}`);
   }
 }
 
 module.exports = {
   sendMessage,
+  getMessages
 }

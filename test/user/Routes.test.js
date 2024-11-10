@@ -1,6 +1,6 @@
-const UserConnector = require('../src/user/Connector');
-const User = require('../src/user/Model');
-const routes = require('../src/App');
+const UserConnector = require('../../src/user/Connector');
+const User = require('../../src/user/Model');
+const routes = require('../../src/App');
 
 const request = require('supertest');
 const mongoose = require('mongoose');
