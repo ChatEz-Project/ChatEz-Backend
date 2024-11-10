@@ -16,8 +16,9 @@ Running:
 - Force stop local server: `sudo kill -9 $(lsof -ti :8080)`
 
 Testing: 
-- `NODE_ENV=test npm test`
+- `NODE_ENV=test npm test -- --maxWorkers=1`
+  - can only have 1 worker as accessing db and cannot do asynchronous changes
 
 Notes: 
 - Running in "dev" or "test" uses test database
-- Running in "test" mode also disables auth and lastActive middleware
+- Running in "test" mode also disables auth and lastActive middleware, needed when doing npm test
