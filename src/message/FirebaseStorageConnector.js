@@ -19,30 +19,7 @@ async function uploadFileToFirebase(file, sender) {
   }
 }
 
-async function testOnlyDeleteDirectoryContents() {
-  try {
-    console.log(`Deleting contents of directory: ${process.env.BUCKET_MESSAGE_FILE_FOLDER}`);
-    const bucket = storage.bucket(process.env.BUCKET_URI);
-
-    const [files] = await bucket.getFiles({
-      prefix: process.env.BUCKET_MESSAGE_FILE_FOLDER
-    });
-
-    const deletePromises = files.map(file => {
-      console.log(`Deleting file: ${file.name}`);
-      return file.delete();
-    });
-
-    await Promise.all(deletePromises);
-
-    console.log(`Successfully deleted all files in ${process.env.BUCKET_MESSAGE_FILE_FOLDER}`);
-  } catch (error) {
-    console.error(`Error deleting directory contents: ${error}`);
-    throw error;
-  }
-}
 
 module.exports = {
-  uploadFileToFirebase,
-  testOnlyDeleteDirectoryContents
+  uploadFileToFirebase
 }

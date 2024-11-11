@@ -1,6 +1,6 @@
 const MessageConnector = require("./MongoConnector");
 const FirebaseStorageConnector = require("./FirebaseStorageConnector");
-const UserConnector = require("../user/Connector");
+const UserConnector = require("../user/MongoConnector");
 const Message = require("./Model")
 const Auth = require("../Auth");
 
@@ -25,7 +25,7 @@ const sendMessage = async (req, res) => {
     let fileUrl = null;
     if(req.file != null){
       fileUrl = await FirebaseStorageConnector.uploadFileToFirebase(req.file, sender);
-      console.log(`uploaded file: ${fileUrl}`);
+      console.log(`uploaded message file: ${fileUrl}`);
     }
 
     const message = new Message({

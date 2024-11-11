@@ -41,6 +41,8 @@ app.patch("/addFriend/:friendEmail"   , UserController.makeFriends); //will frie
 app.patch("/getFriends"               , UserController.getFriends);
 app.patch("/removeFriend/:friendEmail", UserController.breakFriends);
 
+app.post("/setProfilePhoto", UserController.setProfilePhoto); //body <file:> field must contain .jpg or .png or .gif file
+
 app.post("/sendMessage/:recipient", MessagesController.sendMessage); //body must contain <message:> field and optional <file:> field
 app.patch("/getMessages",           MessagesController.getMessages);
 
