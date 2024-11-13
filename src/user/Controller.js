@@ -9,10 +9,10 @@ const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
 
 const getUser = async (req, res) => {
-  const email = Auth.getClientEmail(req)
-  console.log(`Getting user ${email}`);
+  const { userEmail } = req.params;
+  console.log(`Getting user ${userEmail}`);
   try {
-    const user = await UserConnector.getUser(email)
+    const user = await UserConnector.getUser(userEmail)
     if (user !== null ) {
       return res.status(200).send(user);
     } else {
