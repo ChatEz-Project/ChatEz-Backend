@@ -4,7 +4,7 @@ const routesTest = require("../../src/App");
 
 const request = require('supertest');
 const mongoose = require('mongoose');
-const UserConnector = require("../../src/user/Connector");
+const UserConnector = require("../../src/user/MongoConnector");
 
 const api = request(routesTest);
 

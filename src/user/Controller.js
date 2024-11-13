@@ -1,8 +1,10 @@
-const UserConnector = require("./Connector");
+const UserConnector = require("./MongoConnector");
+const ProfilePhotoFirebaseStorageConnector = require("./FirebaseStorageConnector");
 const User = require("./Model")
 const Auth = require("../Auth");
 
 const dotenv = require('dotenv');
+const FirebaseStorageConnector = require("../message/FirebaseStorageConnector");
 const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
 
@@ -121,7 +123,37 @@ const getFriends = async (req, res) => {
   try{
     const user = await UserConnector.getUser(email)
     const friends = await UserConnector.getFriendListUsers(user.friendList)
-    res.status(200).send(friends)
+    return res.status(200).send(friends)
+  }catch (err){
+    console.error(err);
+    return res.status(500).json({ error: `Server Error: ${err}` });
+  }
+}
+
+const setProfilePhoto = async (req, res) => {
+  const userEmail = Auth.getClientEmail(req)
+  try{
+    const profilePhoto = req.file
+
+    if(!profilePhoto){
+      return res.status(400).send('Must contain <file:> field in body')
+    }
+
+    const fileExtension = profilePhoto.originalname.split('.').pop().toLowerCase();
+
+    if(!(fileExtension === "png" || fileExtension === "jpg" || fileExtension === "gif")){
+      return res.status(400).send(`Profile photo must be .jpg or .png or .gif`);
+    }
+
+    const user = await UserConnector.getUser(userEmail)
+
+    await ProfilePhotoFirebaseStorageConnector.deletePhoto(user.photoUrl)
+
+    const photoUrl = await ProfilePhotoFirebaseStorageConnector.uploadPhoto(profilePhoto, user.email)
+    console.log(`Stored photo to firebase ${photoUrl}`);
+    await UserConnector.updatePhotoUrl(userEmail, photoUrl);
+
+    return res.status(200).send("Successfully saved new profile photo");
   }catch (err){
     console.error(err);
     return res.status(500).json({ error: `Server Error: ${err}` });
@@ -133,5 +165,6 @@ module.exports = {
   updateLastActive,
   makeFriends,
   breakFriends,
-  getFriends
+  getFriends,
+  setProfilePhoto
 };

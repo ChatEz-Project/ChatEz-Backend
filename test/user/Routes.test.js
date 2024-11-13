@@ -1,4 +1,4 @@
-const UserConnector = require('../../src/user/Connector');
+const UserConnector = require('../../src/user/MongoConnector');
 const User = require('../../src/user/Model');
 const routes = require('../../src/App');
 
