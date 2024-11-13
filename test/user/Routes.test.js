@@ -18,8 +18,7 @@ describe("Test /getUser", () => {
   });
 
   test("should get the user", async () => {
-    const response = await api.patch("/getUser")
-                              .set({'userEmail': "test@example.com"}) //simulate auth implicitly setting email
+    const response = await api.patch("/getUser/test@example.com")
 
     expect(response.status).toBe(200);
 
