@@ -12,10 +12,18 @@ const verifyFirebaseToken = async (req, res, next) => {
     }
 
     console.log(`Authenticating incoming request with token: ${authHeader}`);
-    const email = (await admin.auth().verifyIdToken(authHeader)).email;
+    const authId = (await admin.auth().verifyIdToken(authHeader))
+    const email = authId.email;
+    const photoUrl = authId.picture;
+    const authUserInfo = (await admin.auth().getUser(authId.uid));
+    const displayName = authUserInfo.displayName;
+
     console.log(`Successfully Authenticated: ${email}`);
-    // Add the decoded token to the request object for use in route handlers
+    console.log(`Successfully Authenticated: ${photoUrl}`);
+
     req.userEmail = email;
+    req.displayName = displayName;
+    req.photoUrl = photoUrl;
 
     next();
   } catch (error) {

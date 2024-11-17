@@ -26,6 +26,9 @@ const getUser = async (req, res) => {
 
 const updateLastActive = async (req, res, next) => {
   const email = req.userEmail;
+  const displayName = req.displayName
+  const photoUrl = req.photoUrl
+
   try {
     const userModel = await UserConnector.getUser(email)
     if ((userModel !== null)) {
@@ -39,7 +42,7 @@ const updateLastActive = async (req, res, next) => {
       next()
     } else{
       try{
-        const insertedUser = await UserConnector.insertUser(new User({email: email}))
+        const insertedUser = await UserConnector.insertUser(new User({email: email, displayName: displayName, photoUrl: photoUrl}))
         console.log(`Inserted new user ${insertedUser.email} with lastActive: ${insertedUser.lastActive}`)
         next()
       }catch(err){
