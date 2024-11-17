@@ -12,7 +12,9 @@ async function connectToDatabase() {
   try {
     const mongoPassword = await accessSecret(`Mongo_${process.env.MONGO_USERNAME}`);
     const dbURI = `mongodb+srv://${process.env.MONGO_USERNAME}:${mongoPassword}@chatez.9mxcu.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority&appName=ChatEz`;
-    await mongoose.connect(dbURI, {});
+    await mongoose.connect(dbURI, {
+      maxPoolSize: process.env.MONGO_MAX_CONNECTIONS
+    });
   } catch (err) {
     console.error('Database connection error:', err); throw err;
   }
