@@ -20,8 +20,11 @@
   - can only have 1 worker as accessing db and cannot do asynchronous changes
 
 #### Notes: 
-- Running in "dev" or "test" uses test database
-- Running in "test" mode also disables auth and lastActive middleware, needed when doing npm test
+- Running in "dev" 
+  - uses development database
+- Running in "test" 
+  - uses test database (for destructive testing)
+  - disables auth and lastActive middleware, needed when doing npm test
 
 #### Features:
 
@@ -38,6 +41,8 @@
 
 - [x] sendMessage
 - [x] getMessages
+- [ ] getMessagesForSideBar
+- [ ] getUserMessages
 - [ ] setMessagesRead
 
 
