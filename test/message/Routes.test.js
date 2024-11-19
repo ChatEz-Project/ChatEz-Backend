@@ -1,5 +1,6 @@
 const MessageConnector = require('../../src/message/MongoConnector');
 const User = require('../../src/user/Model');
+const Message = require('../../src/message/Model');
 const routesTest = require("../../src/App");
 
 const request = require('supertest');
@@ -97,5 +98,60 @@ describe('Test /sendMessage/:recipient', () => {
       .set({'userEmail': sender}) //simulate auth implicitly setting email
 
     expect(response.status).toBe(400);
+  });
+})
+
+describe('Test /getMessagesForSidebar', () => {
+  beforeAll(async () => {
+    await MessageConnector.connectToDatabase()
+    await MessageConnector.testOnlyDeleteAll()
+  })
+
+  afterAll(async () => {
+    await MessageConnector.testOnlyDeleteAll()
+    await mongoose.connection.close()
+  });
+
+  test("should get latest messages for sidebar", async () => {
+    await MessageConnector.storeNewMessage(new Message({sender: "bob", recipient: "dave", message:"test1"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test2"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test3"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "craig", message:"test4"}));
+
+    const response = await api.patch(`/getMessagesForSidebar`)
+      .set({'userEmail': "dave"}) //simulate auth implicitly setting email
+
+    expect(response.status).toBe(200);
+    const responseMessages = response.body.map(msg => new Message(msg))
+    expect(responseMessages.map(msg => msg.message).sort()).toStrictEqual(["test3", "test4"])
+  });
+})
+
+describe('Test /getMessagesForFriend/:friendEmail', () => {
+  beforeAll(async () => {
+    await MessageConnector.connectToDatabase()
+    await MessageConnector.testOnlyDeleteAll()
+  })
+
+  afterAll(async () => {
+    await MessageConnector.testOnlyDeleteAll()
+    await mongoose.connection.close()
+  });
+
+  test("should get messages for friend and set read to true correctly", async () => {
+    await MessageConnector.testOnlyDeleteAll()
+
+    await MessageConnector.storeNewMessage(new Message({sender: "bob", recipient: "dave", message:"test1"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test2"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test3"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "craig", message:"test4"}));
+
+    const response = await api.patch(`/getMessagesForFriend/bob`)
+      .set({'userEmail': "dave"}) //simulate auth implicitly setting email
+
+    expect(response.status).toBe(200);
+    const responseMessages = response.body.map(msg => new Message(msg))
+    expect(responseMessages.map(msg => msg.message).sort()).toStrictEqual(["test1", "test2", "test3"]);
+    expect(responseMessages.map(msg => (msg.message, msg.read)).sort()).toStrictEqual([("test2", false), ("test3", false), ("test1", true)]);
   });
 })

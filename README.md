@@ -22,6 +22,7 @@
 #### Notes: 
 - Running in "dev" 
   - uses development database
+  - if you want your own database change `MONGO_DB=ChatEz-Development` in .env.dev to a name of your choice
 - Running in "test" 
   - uses test database (for destructive testing)
   - disables auth and lastActive middleware, needed when doing npm test
@@ -41,12 +42,11 @@
 
 - [x] sendMessage
 - [x] getMessages
-- [ ] getMessagesForSideBar
-- [ ] getUserMessages
-- [ ] setMessagesRead
+- [x] getMessagesForSideBar
+- [x] getUserMessages
+- [x] setMessagesReadImplicitly
 
 
-- [ ] deleteMessage
 - [ ] deleteConversation
 - [ ] deleteAllMessages
 - [ ] deleteUser

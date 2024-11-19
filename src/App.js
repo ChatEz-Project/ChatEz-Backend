@@ -39,12 +39,14 @@ app.patch("/getUser/:userEmail", UserController.getUser);
 
 app.patch("/addFriend/:friendEmail"   , UserController.makeFriends); //will friend both instantly
 app.patch("/getFriends"               , UserController.getFriends);
-app.patch("/removeFriend/:friendEmail", UserController.breakFriends);
+app.patch("/removeFriend/:friendEmail", UserController.breakFriends); //will implicitly set message read: true
 
 app.post("/setProfilePhoto", UserController.setProfilePhoto); //body <file:> field must contain .jpg or .png or .gif file
 
-app.post("/sendMessage/:recipient", MessagesController.sendMessage); //body must contain <message:> field and optional <file:> field
-app.patch("/getMessages",           MessagesController.getMessages);
+app.post("/sendMessage/:recipient",             MessagesController.sendMessage); //body must contain <message:> field and optional <file:> field
+app.patch("/getMessages",                       MessagesController.getMessages);
+app.patch("/getMessagesForSidebar",             MessagesController.getMessagesForSidebar);
+app.patch("/getMessagesForFriend/:friendEmail", MessagesController.getMessagesForFriend);
 
 
 // Server start

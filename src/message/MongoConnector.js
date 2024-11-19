@@ -3,7 +3,6 @@ const Message = require('./Model');
 
 const dotenv = require("dotenv");
 const mongoose = require('mongoose')
-const User = require("../user/Model");
 
 const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
@@ -41,6 +40,76 @@ async function getUserMessages(email){
   }
 }
 
+async function getFriendMessages(clientEmail, friendEmail){
+  try {
+    return await Message.find({
+      $or: [
+        {$and:[
+          { recipient: clientEmail },
+          { sender: friendEmail }
+        ]},
+        {$and:[
+          { recipient: friendEmail },
+          { sender: clientEmail }
+        ]}
+      ]
+    });
+  }catch(err){
+    console.error(err); throw err;
+  }
+}
+
+async function setFriendMessageRead(clientEmail, friendEmail){
+  try{
+    return await Message.updateMany(
+      {$and:[
+          { recipient: clientEmail },
+          { sender: friendEmail }
+        ]},
+      {read: true},
+      {latest: true}
+    );
+  }catch(err){console.error(err); throw err; }
+}
+
+async function getLatestMessageFromEachConversation(email){
+  try {
+    return await await Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { recipient: email },
+            { sender: email }
+          ]
+        }
+      },
+      {
+        $sort: { dateSent: -1 }
+      },
+      {
+        $group: {
+          _id: {
+            // Use sender and recipient to group conversations
+            conversation: {
+              $cond: [
+                { $gte: [{ $cmp: ["$sender", "$recipient"] }, 0] },
+                { $concat: ["$recipient", "-", "$sender"] },
+                { $concat: ["$sender", "-", "$recipient"] }
+              ]
+            }
+          },
+          latestMessage: { $first: "$$ROOT" } // Get the first (latest) message from each conversation
+        }
+      },
+      {
+        $replaceRoot: { newRoot: "$latestMessage" } // Replace the root with the latest message
+      }
+    ]);
+  }catch(err){
+    console.error(err); throw err;
+  }
+} //mongo aggregation used rather than in code filtering as it is more efficient
+
 async function testOnlyDeleteAll() {
   try{
     return await Message.deleteMany();
@@ -51,5 +120,8 @@ module.exports = {
   storeNewMessage,
   connectToDatabase,
   getUserMessages,
-  testOnlyDeleteAll
+  testOnlyDeleteAll,
+  getFriendMessages,
+  setFriendMessageRead,
+  getLatestMessageFromEachConversation
 }

@@ -14,6 +14,9 @@ const messageSchema = new Schema({
   message  : {type: String,  required: true}
 });
 
+messageSchema.index({ sender: 1, recipient: 1, dateSent: -1 });
+messageSchema.index({ recipient: 1, sender: 1 });
+
 const Message = mongoose.model('Message', messageSchema);
 
 module.exports = Message;
