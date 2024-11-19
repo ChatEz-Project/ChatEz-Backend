@@ -23,7 +23,10 @@ const upload = multer({
 // Middleware
 app.use(logRequest);
 app.use(cors({
-  origin: `http://localhost:${process.env.FRONTEND_PORT}`,
+  origin: [
+    `http://localhost:${process.env.FRONTEND_PORT}`,
+    process.env.FRONTEND_CLOUD_DEPLOYMENT
+  ]
 }));
 app.use(express.json());
 app.use(upload)
