@@ -15,8 +15,6 @@ describe('Test /sendMessage/:recipient', () => {
     await UserConnector.connectToDatabase()
     await MessageConnector.testOnlyDeleteAll()
     await UserConnector.testOnlyDeleteAll()
-    await UserConnector.insertUser(new User({ email: 'test1@example.com' }));
-    await UserConnector.insertUser(new User({ email: 'test2@example.com' }));
   })
 
   afterAll(async () => {
@@ -28,6 +26,9 @@ describe('Test /sendMessage/:recipient', () => {
   test("send messages correctly", async () => {
     const sender = "test1@example.com";
     const recipient = "test2@example.com";
+
+    await UserConnector.insertUser(new User({ email: 'test1@example.com' }));
+    await UserConnector.insertUser(new User({ email: 'test2@example.com' }));
 
     const messageContent = "test message"
 
@@ -123,11 +124,11 @@ describe('Test /getMessagesForSidebar', () => {
 
     expect(response.status).toBe(200);
     const responseMessages = response.body.map(msg => new Message(msg))
-    expect(responseMessages.map(msg => msg.message).sort()).toStrictEqual(["test3", "test4"])
+    expect(responseMessages.map(msg => msg.message)).toStrictEqual(["test4", "test3"])
   });
 })
 
-describe('Test /getMessagesForFriend/:friendEmail', () => {
+describe('Test /getMessagesForFrieFriendnd/:friendEmail', () => {
   beforeAll(async () => {
     await MessageConnector.connectToDatabase()
     await MessageConnector.testOnlyDeleteAll()
@@ -139,8 +140,6 @@ describe('Test /getMessagesForFriend/:friendEmail', () => {
   });
 
   test("should get messages for friend and set read to true correctly", async () => {
-    await MessageConnector.testOnlyDeleteAll()
-
     await MessageConnector.storeNewMessage(new Message({sender: "bob", recipient: "dave", message:"test1"}));
     await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test2"}));
     await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test3"}));
@@ -151,7 +150,6 @@ describe('Test /getMessagesForFriend/:friendEmail', () => {
 
     expect(response.status).toBe(200);
     const responseMessages = response.body.map(msg => new Message(msg))
-    expect(responseMessages.map(msg => msg.message).sort()).toStrictEqual(["test1", "test2", "test3"]);
-    expect(responseMessages.map(msg => (msg.message, msg.read)).sort()).toStrictEqual([("test2", false), ("test3", false), ("test1", true)]);
+    expect(responseMessages.map(msg => (msg.message, msg.read))).toStrictEqual([("test3", false), ("test2", false), ("test1", true)]);
   });
 })

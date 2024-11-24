@@ -9,7 +9,7 @@ const api = request(routes);
 
 describe("Test /getUser", () => {
   beforeAll(async () => {
-    await UserConnector.insertUser(new User({ email: 'test@example.com' }));
+    await UserConnector.connectToDatabase()
   });
 
   afterAll(async () => {
@@ -18,6 +18,8 @@ describe("Test /getUser", () => {
   });
 
   test("should get the user", async () => {
+    await UserConnector.insertUser(new User({ email: 'test@example.com' }));
+
     const response = await api.patch("/getUser/test@example.com")
 
     expect(response.status).toBe(200);
