@@ -19,7 +19,6 @@ const verifyFirebaseToken = async (req, res, next) => {
     const displayName = authUserInfo.displayName;
 
     console.log(`Successfully Authenticated: ${email}`);
-    console.log(`Successfully Authenticated: ${photoUrl}`);
 
     req.userEmail = email;
     req.displayName = displayName;

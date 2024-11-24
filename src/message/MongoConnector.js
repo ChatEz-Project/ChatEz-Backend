@@ -34,7 +34,7 @@ async function getUserMessages(email){
         { recipient: email },
         { sender: email }
       ]
-    }).sort({"dateSent": -1});
+    }).sort({"dateSent": 1});
   }catch(err){
     console.error(err); throw err;
   }
@@ -53,7 +53,7 @@ async function getFriendMessages(clientEmail, friendEmail){
           { sender: clientEmail }
         ]}
       ]
-    }).sort({"dateSent": -1});
+    }).sort({"dateSent": 1});
   }catch(err){
     console.error(err); throw err;
   }
@@ -104,7 +104,7 @@ async function getLatestMessageFromEachConversation(email){
       {
         $replaceRoot: { newRoot: "$latestMessage" } // Replace the root with the latest message
       }
-    ]).sort({"dateSent": -1});
+    ]).sort({"dateSent": 1});
   }catch(err){
     console.error(err); throw err;
   }

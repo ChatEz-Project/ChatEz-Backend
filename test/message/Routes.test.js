@@ -124,11 +124,11 @@ describe('Test /getMessagesForSidebar', () => {
 
     expect(response.status).toBe(200);
     const responseMessages = response.body.map(msg => new Message(msg))
-    expect(responseMessages.map(msg => msg.message)).toStrictEqual(["test4", "test3"])
+    expect(responseMessages.map(msg => msg.message)).toStrictEqual(["test3", "test4"])
   });
 })
 
-describe('Test /getMessagesForFrieFriendnd/:friendEmail', () => {
+describe('Test /getMessagesForFriend/:friendEmail', () => {
   beforeAll(async () => {
     await MessageConnector.connectToDatabase()
     await MessageConnector.testOnlyDeleteAll()
@@ -150,6 +150,6 @@ describe('Test /getMessagesForFrieFriendnd/:friendEmail', () => {
 
     expect(response.status).toBe(200);
     const responseMessages = response.body.map(msg => new Message(msg))
-    expect(responseMessages.map(msg => (msg.message, msg.read))).toStrictEqual([("test3", false), ("test2", false), ("test1", true)]);
+    expect(responseMessages.map(msg => (msg.message, msg.read))).toStrictEqual([("test1", true), ("test2", false), ("test3", false)]);
   });
 })
