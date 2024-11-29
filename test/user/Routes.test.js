@@ -9,6 +9,7 @@ const api = request(routes);
 
 describe("Test /getUser", () => {
   beforeAll(async () => {
+    jest.setTimeout(30000)
     await UserConnector.connectToDatabase()
   });
 

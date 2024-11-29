@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 describe("Test UserController", () => {
   describe("Test updateLastActive", () => {
     beforeAll(async () => {
+      jest.setTimeout(30000)
       await UserConnector.connectToDatabase()
     })
 

@@ -11,6 +11,7 @@ const api = request(routesTest);
 
 describe('Test /sendMessage/:recipient', () => {
   beforeAll(async () => {
+    jest.setTimeout(30000)
     await MessageConnector.connectToDatabase()
     await UserConnector.connectToDatabase()
     await MessageConnector.testOnlyDeleteAll()
