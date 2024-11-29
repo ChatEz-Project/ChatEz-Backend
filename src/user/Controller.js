@@ -42,7 +42,14 @@ const updateLastActive = async (req, res, next) => {
       next()
     } else{
       try{
-        const insertedUser = await UserConnector.insertUser(new User({email: email, displayName: displayName, photoUrl: photoUrl}))
+        const insertedUser = await UserConnector.insertUser(
+          new User({
+            email: email,
+            displayName: displayName,
+            friendList: [email],
+            photoUrl: photoUrl
+          })
+        )
         console.log(`Inserted new user ${insertedUser.email} with lastActive: ${insertedUser.lastActive}`)
         next()
       }catch(err){

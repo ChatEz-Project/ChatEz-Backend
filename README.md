@@ -18,6 +18,9 @@
 #### Testing: 
 - `NODE_ENV=test npm test -- --maxWorkers=1 --timeout=10000`
   - can only have 1 worker as accessing db and cannot do asynchronous changes
+  - poor connection or machine in power saving mode can timeout tests and fail to fix:
+    - provide a better environment for tests to run in
+    - or increase test timeout parameters in command and in code
 
 #### Notes: 
 - Running in "dev" 
