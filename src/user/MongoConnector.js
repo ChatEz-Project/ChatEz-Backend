@@ -98,6 +98,12 @@ async function testOnlyDeleteAll() {
   }catch(err){console.error(err); throw err;}
 }
 
+async function deleteUser(email) {
+  try{
+    return await User.deleteOne({email: email});
+  }catch(err){console.error(err); throw err;}
+}
+
 connectToDatabase().then(_ => console.log("User database connector initialised"));
 
 module.exports = {
@@ -109,5 +115,6 @@ module.exports = {
   getFriendListUsers,
   updatePhotoUrl,
   testOnlyDeleteAll,
-  connectToDatabase
+  connectToDatabase,
+  deleteUser
 }
