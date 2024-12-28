@@ -111,6 +111,19 @@ async function updateDisplayName(email, displayName) {
   }
 }
 
+async function updateLanguage(email, language) {
+  try {
+    return await User.findOneAndUpdate(
+      { email: email },
+      { language: language },
+      { new: true }
+    );
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
 async function getFriendListUsers(friendList) {
   try {
     return await User.find({ email: { $in: friendList } });
@@ -142,6 +155,7 @@ module.exports = {
   getFriendListUsers,
   updatePhotoUrl,
   updateDisplayName,
+  updateLanguage,
   testOnlyDeleteAll,
   connectToDatabase,
 };

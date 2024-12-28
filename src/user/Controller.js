@@ -5,6 +5,7 @@ const Auth = require("../Auth");
 
 const dotenv = require("dotenv");
 const FirebaseStorageConnector = require("../message/FirebaseStorageConnector");
+const { languageOptions } = require("./languagesOptions");
 const environment = process.env.NODE_ENV || "dev";
 dotenv.config({ path: `.env.${environment}` });
 
@@ -173,6 +174,33 @@ const setDisplayName = async (req, res) => {
   }
 };
 
+const setLanguage = async (req, res) => {
+  const email = Auth.getClientEmail(req);
+  const language = req.body.language;
+
+  if (!language) {
+    return res.status(400).send("Must contain <language:> field in body");
+  }
+
+  // Check if the language exists in languageOptions
+  const isLanguageValid = languageOptions.some(
+    (option) => option.code === language
+  );
+
+  if (!isLanguageValid) {
+    return res.status(400).send("Invalid language code");
+  }
+
+  if (language)
+    try {
+      await UserConnector.updateLanguage(email, language);
+      return res.status(200).send("Successfully set language");
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: `Server Error: ${err}` });
+    }
+};
+
 const setProfilePhoto = async (req, res) => {
   const userEmail = Auth.getClientEmail(req);
   try {
@@ -222,5 +250,6 @@ module.exports = {
   breakFriends,
   getFriends,
   setDisplayName,
+  setLanguage,
   setProfilePhoto,
 };

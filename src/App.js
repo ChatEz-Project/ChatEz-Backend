@@ -66,6 +66,7 @@ app.patch("/removeFriend/:friendEmail", UserController.breakFriends); //will imp
 
 app.post("/setProfilePhoto", UserController.setProfilePhoto); //body <file:> field must contain .jpg or .png or .gif file
 app.post("/setDisplayName", UserController.setDisplayName); //body <displayName:> field must contain string
+app.post("/setLanguage", UserController.setLanguage); //body <language:> field must contain string
 
 app.post("/sendMessage/:recipient", MessagesController.sendMessage); //body must contain <message:> field and optional <file:> field
 app.patch("/getMessages", MessagesController.getMessages);
