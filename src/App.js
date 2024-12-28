@@ -69,10 +69,10 @@ app.post("/setProfilePhoto", UserController.setProfilePhoto); //body <file:> fie
 app.post("/sendMessage/:recipient", MessagesController.sendMessage); //body must contain <message:> field and optional <file:> field
 app.patch("/getMessages", MessagesController.getMessages);
 app.patch("/getMessagesForSidebar", MessagesController.getMessagesForSidebar);
-app.patch(
-  "/getMessagesForFriend/:friendEmail",
-  MessagesController.getMessagesForFriend
-);
+app.patch("/getMessagesForFriend/:friendEmail", MessagesController.getMessagesForFriend);
+
+app.delete("/deleteAllUserConversations", MessagesController.deleteAllUserConversations);
+app.delete("/deleteUser", UserController.deleteUser);
 
 // Server start
 if (require.main === module) {

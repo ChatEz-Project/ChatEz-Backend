@@ -91,9 +91,36 @@ const setFriendMessagesToRead = async (clientEmail, friendEmail) => {
   }
 }
 
+const deleteAllUserConversations = async (req, res) => {
+  try{
+    const userEmail = Auth.getClientEmail(req);
+
+    await messageDeletionPipeline(userEmail);
+    return res.status(200).send(`Deleted all messages related to: ${userEmail}`);
+  }catch (err){
+    return res.status(500).send(`Server Error: ${err}`);
+  }
+}
+
+const messageDeletionPipeline = async (userEmail) => {
+  try{
+    const messages = await MessageConnector.getUserMessages(userEmail);
+    await messages.map(message => FirebaseStorageConnector.deleteFileFromFirebase(message.fileUrl));
+
+    console.log(`Deleted all message files related to: ${userEmail}`)
+
+    return await MessageConnector.deleteMessagesContainingUser(userEmail);
+  }catch (err){
+    console.error("Error deleting messages");
+    err;
+  }
+}
+
 module.exports = {
   sendMessage,
   getMessages,
   getMessagesForSidebar,
-  getMessagesForFriend
+  getMessagesForFriend,
+  deleteAllUserConversations,
+  messageDeletionPipeline
 }

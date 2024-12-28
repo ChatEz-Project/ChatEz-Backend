@@ -51,8 +51,8 @@
 
 
 - [ ] deleteConversation
-- [ ] deleteAllMessages
-- [ ] deleteUser
+- [x] deleteAllConversations
+- [x] deleteUser
 
 
 - [x] implicitLastActive

@@ -1,10 +1,11 @@
 const UserConnector = require("./MongoConnector");
+const MessageController = require("../message/Controller");
 const ProfilePhotoFirebaseStorageConnector = require("./FirebaseStorageConnector");
 const User = require("./Model")
 const Auth = require("../Auth");
+const firebaseAdmin = require("../FirebaseAdmin").admin;
 
 const dotenv = require('dotenv');
-const FirebaseStorageConnector = require("../message/FirebaseStorageConnector");
 const environment = process.env.NODE_ENV || 'dev';
 dotenv.config({ path: `.env.${environment}` });
 
@@ -45,7 +46,7 @@ const updateLastActive = async (req, res, next) => {
         await addNewUser(email, displayName, photoUrl)
         next()
       }catch(err){
-        throw err
+        console.error(err)
       }
     }
   } catch (err) {
@@ -174,11 +175,40 @@ const setProfilePhoto = async (req, res) => {
   }
 }
 
+const deleteUser = async (req, res) => {
+  try{
+    const userEmail = Auth.getClientEmail(req);
+    const userToDelete = await UserConnector.getUser(userEmail);
+    await MessageController.messageDeletionPipeline(userEmail);
+    console.log("User deletion pipeline: deleted messages");
+
+    await ProfilePhotoFirebaseStorageConnector.deletePhoto(userToDelete.photoUrl)
+    console.log("User deletion pipeline: deleted photo");
+
+    await UserConnector.deleteUser(userEmail);
+    console.log("User deletion pipeline: deleted user db entry");
+
+    try {
+      const firebaseAuthUser = await firebaseAdmin.auth().getUserByEmail(userEmail);
+      await firebaseAdmin.auth().deleteUser(firebaseAuthUser.uid);
+      console.log("User deletion pipeline: deleted firebase auth user");
+    }catch {
+      console.log("User deletion pipeline: failed to delete firebase auth user - ignore this if test");
+    }
+
+    return res.status(200).send("Successfully deleted user");
+  }catch(err) {
+    console.error(err);
+    return res.status(500).json({ error: `Server Error: ${err}` });
+  }
+}
+
 module.exports = {
   getUser,
   updateLastActive,
   makeFriends,
   breakFriends,
   getFriends,
-  setProfilePhoto
+  setProfilePhoto,
+  deleteUser
 };

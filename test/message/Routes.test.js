@@ -154,3 +154,39 @@ describe('Test /getMessagesForFriend/:friendEmail', () => {
     expect(responseMessages.map(msg => (msg.message, msg.read))).toStrictEqual([("test1", true), ("test2", false), ("test3", false)]);
   });
 })
+
+describe('Test /deleteAllUserConversations', () => {
+  beforeAll(async () => {
+    await MessageConnector.connectToDatabase()
+    await MessageConnector.testOnlyDeleteAll()
+  })
+
+  afterAll(async () => {
+    await MessageConnector.testOnlyDeleteAll()
+    await mongoose.connection.close()
+  });
+
+  test("should delete conversations correctly", async () => {
+    await MessageConnector.storeNewMessage(new Message({sender: "bob", recipient: "dave", message:"test1"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test2"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "dave", recipient: "bob", message:"test3"}));
+    await MessageConnector.storeNewMessage(new Message({sender: "bob", recipient: "craig", message:"test4"}));
+
+    const response = await api.delete(`/deleteAllUserConversations`)
+      .set({'userEmail': "dave"}) //simulate auth implicitly setting email
+
+    expect(response.status).toBe(200);
+
+    const response2 = await api.patch(`/getMessages`)
+      .set({'userEmail': "dave"}) //simulate auth implicitly setting email
+
+    const responseMessages = response2.body.map(msg => new Message(msg))
+    expect(responseMessages.map(msg => msg.message)).toStrictEqual([]);
+
+    const response3 = await api.patch(`/getMessages`)
+      .set({'userEmail': "bob"}) //simulate auth implicitly setting email
+
+    const responseMessages2 = response3.body.map(msg => new Message(msg))
+    expect(responseMessages2.map(msg => msg.message)).toStrictEqual(["test4"]);
+  });
+})
