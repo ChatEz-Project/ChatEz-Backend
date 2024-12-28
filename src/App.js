@@ -65,6 +65,7 @@ app.patch("/getFriends", UserController.getFriends);
 app.patch("/removeFriend/:friendEmail", UserController.breakFriends); //will implicitly set message read: true
 
 app.post("/setProfilePhoto", UserController.setProfilePhoto); //body <file:> field must contain .jpg or .png or .gif file
+app.post("/setDisplayName", UserController.setDisplayName); //body <displayName:> field must contain string
 
 app.post("/sendMessage/:recipient", MessagesController.sendMessage); //body must contain <message:> field and optional <file:> field
 app.patch("/getMessages", MessagesController.getMessages);
