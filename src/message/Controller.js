@@ -102,6 +102,20 @@ const deleteAllUserConversations = async (req, res) => {
   }
 }
 
+const deleteConversation = async (req, res) => {
+  try {
+    const clientEmail = Auth.getClientEmail(req);
+    const { friendEmail } = req.params;
+    await MessageConnector.deleteConversation(clientEmail, friendEmail);
+    return res
+      .status(200)
+      .send(`Conversation deleted for friend ${friendEmail}`);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(`Server Error: ${err}`);
+  }
+};
+
 const messageDeletionPipeline = async (userEmail) => {
   try{
     const messages = await MessageConnector.getUserMessages(userEmail);
@@ -122,5 +136,6 @@ module.exports = {
   getMessagesForSidebar,
   getMessagesForFriend,
   deleteAllUserConversations,
-  messageDeletionPipeline
+  messageDeletionPipeline,
+  deleteConversation
 }
