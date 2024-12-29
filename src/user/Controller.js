@@ -1,6 +1,7 @@
 const UserConnector = require("./MongoConnector");
 const MessageController = require("../message/Controller");
 const ProfilePhotoFirebaseStorageConnector = require("./FirebaseStorageConnector");
+const { languageOptions } = require("./languagesOptions");
 const User = require("./Model");
 const Auth = require("../Auth");
 const firebaseAdmin = require("../FirebaseAdmin").admin;
