@@ -1,11 +1,11 @@
 const UserConnector = require("./MongoConnector");
+const MessageController = require("../message/Controller");
 const ProfilePhotoFirebaseStorageConnector = require("./FirebaseStorageConnector");
 const User = require("./Model");
 const Auth = require("../Auth");
+const firebaseAdmin = require("../FirebaseAdmin").admin;
 
 const dotenv = require("dotenv");
-const FirebaseStorageConnector = require("../message/FirebaseStorageConnector");
-const { languageOptions } = require("./languagesOptions");
 const environment = process.env.NODE_ENV || "dev";
 dotenv.config({ path: `.env.${environment}` });
 
@@ -48,7 +48,7 @@ const updateLastActive = async (req, res, next) => {
         await addNewUser(email, displayName, photoUrl);
         next();
       } catch (err) {
-        throw err;
+        console.error(err);
       }
     }
   } catch (err) {
@@ -157,6 +157,48 @@ const getFriends = async (req, res) => {
   }
 };
 
+const setProfilePhoto = async (req, res) => {
+  const userEmail = Auth.getClientEmail(req);
+  try {
+    const profilePhoto = req.file;
+
+    if (!profilePhoto) {
+      return res.status(400).send("Must contain <file:> field in body");
+    }
+
+    const fileExtension = profilePhoto.originalname
+      .split(".")
+      .pop()
+      .toLowerCase();
+
+    if (
+      !(
+        fileExtension === "png" ||
+        fileExtension === "jpg" ||
+        fileExtension === "gif"
+      )
+    ) {
+      return res.status(400).send(`Profile photo must be .jpg or .png or .gif`);
+    }
+
+    const user = await UserConnector.getUser(userEmail);
+
+    await ProfilePhotoFirebaseStorageConnector.deletePhoto(user.photoUrl);
+
+    const photoUrl = await ProfilePhotoFirebaseStorageConnector.uploadPhoto(
+      profilePhoto,
+      user.email
+    );
+    console.log(`Stored photo to firebase ${photoUrl}`);
+    await UserConnector.updatePhotoUrl(userEmail, photoUrl);
+
+    return res.status(200).send("Successfully saved new profile photo");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: `Server Error: ${err}` });
+  }
+};
+
 const setDisplayName = async (req, res) => {
   const email = Auth.getClientEmail(req);
   const displayName = req.body.displayName;
@@ -201,42 +243,34 @@ const setLanguage = async (req, res) => {
     }
 };
 
-const setProfilePhoto = async (req, res) => {
-  const userEmail = Auth.getClientEmail(req);
+const deleteUser = async (req, res) => {
   try {
-    const profilePhoto = req.file;
+    const userEmail = Auth.getClientEmail(req);
+    const userToDelete = await UserConnector.getUser(userEmail);
+    await MessageController.messageDeletionPipeline(userEmail);
+    console.log("User deletion pipeline: deleted messages");
 
-    if (!profilePhoto) {
-      return res.status(400).send("Must contain <file:> field in body");
-    }
-
-    const fileExtension = profilePhoto.originalname
-      .split(".")
-      .pop()
-      .toLowerCase();
-
-    if (
-      !(
-        fileExtension === "png" ||
-        fileExtension === "jpg" ||
-        fileExtension === "gif"
-      )
-    ) {
-      return res.status(400).send(`Profile photo must be .jpg or .png or .gif`);
-    }
-
-    const user = await UserConnector.getUser(userEmail);
-
-    await ProfilePhotoFirebaseStorageConnector.deletePhoto(user.photoUrl);
-
-    const photoUrl = await ProfilePhotoFirebaseStorageConnector.uploadPhoto(
-      profilePhoto,
-      user.email
+    await ProfilePhotoFirebaseStorageConnector.deletePhoto(
+      userToDelete.photoUrl
     );
-    console.log(`Stored photo to firebase ${photoUrl}`);
-    await UserConnector.updatePhotoUrl(userEmail, photoUrl);
+    console.log("User deletion pipeline: deleted photo");
 
-    return res.status(200).send("Successfully saved new profile photo");
+    await UserConnector.deleteUser(userEmail);
+    console.log("User deletion pipeline: deleted user db entry");
+
+    try {
+      const firebaseAuthUser = await firebaseAdmin
+        .auth()
+        .getUserByEmail(userEmail);
+      await firebaseAdmin.auth().deleteUser(firebaseAuthUser.uid);
+      console.log("User deletion pipeline: deleted firebase auth user");
+    } catch {
+      console.log(
+        "User deletion pipeline: failed to delete firebase auth user - ignore this if test"
+      );
+    }
+
+    return res.status(200).send("Successfully deleted user");
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: `Server Error: ${err}` });
@@ -249,7 +283,8 @@ module.exports = {
   makeFriends,
   breakFriends,
   getFriends,
+  setProfilePhoto,
+  deleteUser,
   setDisplayName,
   setLanguage,
-  setProfilePhoto,
 };

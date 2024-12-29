@@ -88,20 +88,6 @@ const getMessagesForFriend = async (req, res) => {
   }
 };
 
-const deleteConversation = async (req, res) => {
-  try {
-    const clientEmail = Auth.getClientEmail(req);
-    const { friendEmail } = req.params;
-    await MessageConnector.deleteConversation(clientEmail, friendEmail);
-    return res
-      .status(200)
-      .send(`Conversation deleted for friend ${friendEmail}`);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send(`Server Error: ${err}`);
-  }
-};
-
 const setFriendMessagesToRead = async (clientEmail, friendEmail) => {
   try {
     console.log(
@@ -117,10 +103,55 @@ const setFriendMessagesToRead = async (clientEmail, friendEmail) => {
   }
 };
 
+const deleteConversation = async (req, res) => {
+  try {
+    const clientEmail = Auth.getClientEmail(req);
+    const { friendEmail } = req.params;
+    await MessageConnector.deleteConversation(clientEmail, friendEmail);
+    return res
+      .status(200)
+      .send(`Conversation deleted for friend ${friendEmail}`);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(`Server Error: ${err}`);
+  }
+};
+
+const deleteAllUserConversations = async (req, res) => {
+  try {
+    const userEmail = Auth.getClientEmail(req);
+
+    await messageDeletionPipeline(userEmail);
+    return res
+      .status(200)
+      .send(`Deleted all messages related to: ${userEmail}`);
+  } catch (err) {
+    return res.status(500).send(`Server Error: ${err}`);
+  }
+};
+
+const messageDeletionPipeline = async (userEmail) => {
+  try {
+    const messages = await MessageConnector.getUserMessages(userEmail);
+    await messages.map((message) =>
+      FirebaseStorageConnector.deleteFileFromFirebase(message.fileUrl)
+    );
+
+    console.log(`Deleted all message files related to: ${userEmail}`);
+
+    return await MessageConnector.deleteMessagesContainingUser(userEmail);
+  } catch (err) {
+    console.error("Error deleting messages");
+    err;
+  }
+};
+
 module.exports = {
   sendMessage,
   getMessages,
   getMessagesForSidebar,
   getMessagesForFriend,
+  deleteAllUserConversations,
+  messageDeletionPipeline,
   deleteConversation,
 };

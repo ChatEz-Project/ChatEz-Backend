@@ -189,3 +189,32 @@ describe("Test /getFriends", () => {
     expect(result3.body.map(user => user.email)).toStrictEqual([]);
   });
 })
+
+describe("Test /deleteUser", () => {
+  beforeAll(async () => {
+    await UserConnector.connectToDatabase()
+  })
+  afterAll(async () => {
+    await UserConnector.testOnlyDeleteAll()
+    await mongoose.connection.close()
+  });
+
+  test("should return correct friends", async () => {
+    const user1 = "test1@example.com";
+    const user2 = "test2@example.com";
+    const user3 = "test3@example.com";
+
+    await UserConnector.insertUser(new User({ email: user1 }));
+    await UserConnector.insertUser(new User({ email: user2, friendList: [user1, user2, user3] }));
+    await UserConnector.insertUser(new User({ email: user3}));
+
+    result1 = await api.delete(`/deleteUser`)
+      .set({'userEmail': user1});
+    expect(result1.status).toBe(200);
+
+    result2 = await api.patch(`/getFriends`)
+      .set({'userEmail': user2});
+    expect(result2.status).toBe(200);
+    expect(result2.body.map(user => user.email)).toStrictEqual([user2, user3]);
+  });
+})

@@ -183,74 +183,96 @@ describe("Test /getMessagesForFriend/:friendEmail", () => {
   });
 });
 
-describe("Test /deleteConversation/:friendEmail", () => {
+describe("Test /deleteAllUserConversations", () => {
   beforeAll(async () => {
-    jest.setTimeout(30000);
     await MessageConnector.connectToDatabase();
-    await UserConnector.connectToDatabase();
     await MessageConnector.testOnlyDeleteAll();
-    await UserConnector.testOnlyDeleteAll();
   });
 
   afterAll(async () => {
     await MessageConnector.testOnlyDeleteAll();
-    await UserConnector.testOnlyDeleteAll();
     await mongoose.connection.close();
   });
 
-  test("should delete all messages between client and friend", async () => {
-    const clientEmail = "test1@example.com";
-    const friendEmail = "test2@example.com";
-
-    // Insert users
-    await UserConnector.insertUser(new User({ email: clientEmail }));
-    await UserConnector.insertUser(new User({ email: friendEmail }));
-
-    // Insert messages between client and friend
+  test("should delete conversations correctly", async () => {
     await MessageConnector.storeNewMessage(
-      new Message({
-        sender: clientEmail,
-        recipient: friendEmail,
-        message: "test1",
-      })
+      new Message({ sender: "bob", recipient: "dave", message: "test1" })
     );
     await MessageConnector.storeNewMessage(
-      new Message({
-        sender: friendEmail,
-        recipient: clientEmail,
-        message: "test2",
-      })
+      new Message({ sender: "dave", recipient: "bob", message: "test2" })
     );
     await MessageConnector.storeNewMessage(
-      new Message({
-        sender: clientEmail,
-        recipient: friendEmail,
-        message: "test3",
-      })
+      new Message({ sender: "dave", recipient: "bob", message: "test3" })
+    );
+    await MessageConnector.storeNewMessage(
+      new Message({ sender: "bob", recipient: "craig", message: "test4" })
     );
 
-    // Verify messages exist before deletion
-    const preDeleteMessages = await MessageConnector.getFriendMessages(
-      clientEmail,
-      friendEmail
-    );
-    expect(preDeleteMessages.length).toBe(3);
-
-    // Delete conversation
     const response = await api
-      .post(`/deleteConversation/${friendEmail}`)
-      .set({ userEmail: clientEmail });
+      .delete(`/deleteAllUserConversations`)
+      .set({ userEmail: "dave" }); //simulate auth implicitly setting email
 
     expect(response.status).toBe(200);
-    expect(response.text).toBe(
-      `Conversation deleted for friend ${friendEmail}`
+
+    const response2 = await api
+      .patch(`/getMessages`)
+      .set({ userEmail: "dave" }); //simulate auth implicitly setting email
+
+    const responseMessages = response2.body.map((msg) => new Message(msg));
+    expect(responseMessages.map((msg) => msg.message)).toStrictEqual([]);
+
+    const response3 = await api.patch(`/getMessages`).set({ userEmail: "bob" }); //simulate auth implicitly setting email
+
+    const responseMessages2 = response3.body.map((msg) => new Message(msg));
+    expect(responseMessages2.map((msg) => msg.message)).toStrictEqual([
+      "test4",
+    ]);
+  });
+});
+
+describe("Test /deleteAllUserConversations", () => {
+  beforeAll(async () => {
+    await MessageConnector.connectToDatabase();
+    await MessageConnector.testOnlyDeleteAll();
+  });
+
+  afterAll(async () => {
+    await MessageConnector.testOnlyDeleteAll();
+    await mongoose.connection.close();
+  });
+
+  test("should delete conversations correctly", async () => {
+    await MessageConnector.storeNewMessage(
+      new Message({ sender: "bob", recipient: "dave", message: "test1" })
+    );
+    await MessageConnector.storeNewMessage(
+      new Message({ sender: "dave", recipient: "bob", message: "test2" })
+    );
+    await MessageConnector.storeNewMessage(
+      new Message({ sender: "dave", recipient: "bob", message: "test3" })
+    );
+    await MessageConnector.storeNewMessage(
+      new Message({ sender: "bob", recipient: "craig", message: "test4" })
     );
 
-    // Verify messages have been deleted
-    const postDeleteMessages = await MessageConnector.getFriendMessages(
-      clientEmail,
-      friendEmail
-    );
-    expect(postDeleteMessages.length).toBe(0);
+    const response = await api
+      .delete(`/deleteAllUserConversations`)
+      .set({ userEmail: "dave" }); //simulate auth implicitly setting email
+
+    expect(response.status).toBe(200);
+
+    const response2 = await api
+      .patch(`/getMessages`)
+      .set({ userEmail: "dave" }); //simulate auth implicitly setting email
+
+    const responseMessages = response2.body.map((msg) => new Message(msg));
+    expect(responseMessages.map((msg) => msg.message)).toStrictEqual([]);
+
+    const response3 = await api.patch(`/getMessages`).set({ userEmail: "bob" }); //simulate auth implicitly setting email
+
+    const responseMessages2 = response3.body.map((msg) => new Message(msg));
+    expect(responseMessages2.map((msg) => msg.message)).toStrictEqual([
+      "test4",
+    ]);
   });
 });

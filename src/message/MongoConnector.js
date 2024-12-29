@@ -105,6 +105,15 @@ async function getLatestMessageFromEachConversation(email) {
   }
 } //mongo aggregation used rather than in code filtering as it is more efficient
 
+async function deleteMessagesContainingUser(user) {
+  try {
+    return Message.deleteMany({ $or: [{ recipient: user }, { sender: user }] });
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
 async function deleteConversation(clientEmail, friendEmail) {
   try {
     return await Message.deleteMany({
@@ -139,6 +148,7 @@ module.exports = {
   testOnlyDeleteAll,
   getFriendMessages,
   setFriendMessageRead,
-  deleteConversation,
   getLatestMessageFromEachConversation,
+  deleteMessagesContainingUser,
+  deleteConversation,
 };

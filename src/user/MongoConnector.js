@@ -98,6 +98,24 @@ async function updatePhotoUrl(email, photoUrl) {
   }
 }
 
+async function getFriendListUsers(friendList) {
+  try {
+    return await User.find({ email: { $in: friendList } });
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
+async function testOnlyDeleteAll() {
+  try {
+    return await User.deleteMany();
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
 async function updateDisplayName(email, displayName) {
   try {
     return await User.findOneAndUpdate(
@@ -124,18 +142,9 @@ async function updateLanguage(email, language) {
   }
 }
 
-async function getFriendListUsers(friendList) {
+async function deleteUser(email) {
   try {
-    return await User.find({ email: { $in: friendList } });
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
-
-async function testOnlyDeleteAll() {
-  try {
-    return await User.deleteMany();
+    return await User.deleteOne({ email: email });
   } catch (err) {
     console.error(err);
     throw err;
@@ -154,8 +163,9 @@ module.exports = {
   updateLastActive,
   getFriendListUsers,
   updatePhotoUrl,
-  updateDisplayName,
-  updateLanguage,
   testOnlyDeleteAll,
   connectToDatabase,
+  deleteUser,
+  updateLanguage,
+  updateDisplayName,
 };
