@@ -1,7 +1,8 @@
 const UserConnector = require("./MongoConnector");
 const MessageController = require("../message/Controller");
 const ProfilePhotoFirebaseStorageConnector = require("./FirebaseStorageConnector");
-const User = require("./Model")
+const User = require("./Model");
+const { languageOptions } = require("./languagesOptions");
 const Auth = require("../Auth");
 const firebaseAdmin = require("../FirebaseAdmin").admin;
 
@@ -203,6 +204,48 @@ const deleteUser = async (req, res) => {
   }
 }
 
+const setDisplayName = async (req, res) => {
+  const email = Auth.getClientEmail(req);
+  const displayName = req.body.displayName;
+
+  if (!displayName) {
+    return res.status(400).send("Must contain <displayName:> field in body");
+  }
+
+  try {
+    await UserConnector.updateDisplayName(email, displayName);
+    return res.status(200).send("Successfully set display name");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: `Server Error: ${err}` });
+  }
+};
+
+const setLanguage = async (req, res) => {
+  const email = Auth.getClientEmail(req);
+  const language = req.body.language;
+
+  if (!language) {
+    return res.status(400).send("Must contain <language:> field in body");
+  }
+
+  // Check if the language exists in languageOptions
+  const isLanguageValid = languageOptions.some((option) => option.code === language);
+
+  if (!isLanguageValid) {
+    return res.status(400).send("Invalid language code");
+  }
+
+  if (language)
+    try {
+      await UserConnector.updateLanguage(email, language);
+      return res.status(200).send("Successfully set language");
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: `Server Error: ${err}` });
+    }
+};
+
 module.exports = {
   getUser,
   updateLastActive,
@@ -210,5 +253,7 @@ module.exports = {
   breakFriends,
   getFriends,
   setProfilePhoto,
-  deleteUser
+  deleteUser,
+  setDisplayName,
+  setLanguage
 };

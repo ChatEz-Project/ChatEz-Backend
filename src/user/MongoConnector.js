@@ -86,6 +86,32 @@ async function updatePhotoUrl(email, photoUrl){
   }catch(err){console.error(err); throw err; }
 }
 
+async function updateDisplayName(email, displayName) {
+  try {
+    return await User.findOneAndUpdate(
+      { email: email },
+      { displayName: displayName },
+      { new: true }
+    );
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
+async function updateLanguage(email, language) {
+  try {
+    return await User.findOneAndUpdate(
+      { email: email },
+      { language: language },
+      { new: true }
+    );
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
 async function getFriendListUsers(friendList){
   try{
     return await User.find({email:{ $in: friendList}})
@@ -116,5 +142,7 @@ module.exports = {
   updatePhotoUrl,
   testOnlyDeleteAll,
   connectToDatabase,
-  deleteUser
+  deleteUser,
+  updateDisplayName,
+  updateLanguage
 }

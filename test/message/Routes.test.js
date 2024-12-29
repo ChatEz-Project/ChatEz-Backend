@@ -190,3 +190,48 @@ describe('Test /deleteAllUserConversations', () => {
     expect(responseMessages2.map(msg => msg.message)).toStrictEqual(["test4"]);
   });
 })
+
+describe("Test /deleteConversation/:friendEmail", () => {
+  beforeAll(async () => {
+    jest.setTimeout(30000);
+    await MessageConnector.connectToDatabase();
+    await UserConnector.connectToDatabase();
+    await MessageConnector.testOnlyDeleteAll();
+    await UserConnector.testOnlyDeleteAll();
+  });
+
+  afterAll(async () => {
+    await MessageConnector.testOnlyDeleteAll();
+    await UserConnector.testOnlyDeleteAll();
+    await mongoose.connection.close();
+  });
+  
+  test("should delete all messages between client and friend", async () => {
+    const clientEmail = "test1@example.com";
+    const friendEmail = "test2@example.com";
+
+    // Insert users
+    await UserConnector.insertUser(new User({ email: clientEmail }));
+    await UserConnector.insertUser(new User({ email: friendEmail }));
+
+    // Insert messages between client and friend
+    await MessageConnector.storeNewMessage(new Message({sender: clientEmail, recipient: friendEmail, message: "test1"}));
+    await MessageConnector.storeNewMessage(new Message({ sender: friendEmail, recipient: clientEmail, message: "test2"}));
+    await MessageConnector.storeNewMessage(new Message({sender: clientEmail, recipient: friendEmail, message: "test3"}));
+
+    // Verify messages exist before deletion
+    const preDeleteMessages = await MessageConnector.getFriendMessages(clientEmail, friendEmail);
+    expect(preDeleteMessages.length).toBe(3);
+
+    // Delete conversation
+    const response = await api.post(`/deleteConversation/${friendEmail}`)
+      .set({ userEmail: clientEmail });
+
+    expect(response.status).toBe(200);
+    expect(response.text).toBe(`Conversation deleted for friend ${friendEmail}`);
+
+    // Verify messages have been deleted
+    const postDeleteMessages = await MessageConnector.getFriendMessages(clientEmail, friendEmail);
+    expect(postDeleteMessages.length).toBe(0);
+  });
+});

@@ -2,6 +2,9 @@ const UserConnector = require('../../src/user/MongoConnector');
 const UserController = require('../../src/user/Controller');
 const User = require('../../src/user/Model');
 
+const routes = require("../../src/App");
+const request = require("supertest");
+const api = request(routes);
 const mongoose = require('mongoose');
 
 describe("Test UserController", () => {
@@ -52,4 +55,57 @@ describe("Test UserController", () => {
     })
   });
 
+  describe("Test setDisplayName", () => {
+    beforeAll(async () => {
+      await UserConnector.connectToDatabase();
+      await UserConnector.testOnlyDeleteAll();
+    });
+
+    afterAll(async () => {
+      await UserConnector.testOnlyDeleteAll();
+      await mongoose.connection.close();
+    });
+
+    test("should update display name", async () => {
+      await UserConnector.insertUser(
+        new User({ email: "test2@example.com", displayName: "test1" })
+      );
+
+      const response1 = await api
+        .post(`/setDisplayName`)
+        .set({ userEmail: "test2@example.com" }) //simulate auth implicitly setting email
+        .send({ displayName: "test2" });
+
+      expect(response1.status).toBe(200);
+
+      const response2 = await UserConnector.getUser("test2@example.com");
+      expect(response2.displayName).toEqual("test2");
+    });
+  });
+
+  describe("Test setLanguage", () => {
+    beforeAll(async () => {
+      await UserConnector.connectToDatabase();
+      await UserConnector.testOnlyDeleteAll();
+    });
+
+    afterAll(async () => {
+      await UserConnector.testOnlyDeleteAll();
+      await mongoose.connection.close();
+    });
+
+    test("should update language", async () => {
+      await UserConnector.insertUser(new User({ email: "test2@example.com" }));
+
+      const response1 = await api
+        .post(`/setLanguage`)
+        .set({ userEmail: "test2@example.com" }) //simulate auth implicitly setting email
+        .send({ language: "en" });
+
+      expect(response1.status).toBe(200);
+
+      const response2 = await UserConnector.getUser("test2@example.com");
+      expect(response2.language).toEqual("en");
+    });
+  });
 });

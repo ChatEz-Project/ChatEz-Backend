@@ -123,6 +123,24 @@ async function deleteMessagesContainingUser(user){
   }
 }
 
+async function deleteConversation(clientEmail, friendEmail) {
+  try {
+    return await Message.deleteMany({
+      $or: [
+        {
+          $and: [{ recipient: clientEmail }, { sender: friendEmail }],
+        },
+        {
+          $and: [{ recipient: friendEmail }, { sender: clientEmail }],
+        },
+      ],
+    });
+  } catch (err) {
+    console.error("Error deleting messages:", err);
+    throw err;
+  }
+}
+
 async function testOnlyDeleteAll() {
   try{
     return await Message.deleteMany();
@@ -137,5 +155,6 @@ module.exports = {
   getFriendMessages,
   setFriendMessageRead,
   getLatestMessageFromEachConversation,
-  deleteMessagesContainingUser
+  deleteMessagesContainingUser,
+  deleteConversation
 }
