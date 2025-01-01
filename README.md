@@ -56,6 +56,7 @@
 
 
 - [x] implicit last active based on any requests as auth user
+- [x] implicit user creation on first auth user req
   
 - [x] custom middleware for implicit requesting user from auth code
 - [x] custom req logger middleware
