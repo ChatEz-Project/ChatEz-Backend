@@ -33,8 +33,8 @@
 #### Features:
 
 - [x] getUser
-- [ ] setLanguage
-- [ ] setDisplayName
+- [x] setLanguage
+- [x] setDisplayName
 - [x] setProfilePhoto
 
 
@@ -50,9 +50,15 @@
 - [x] setMessagesReadImplicitly
 
 
-- [ ] deleteConversation
+- [x] deleteConversation
 - [x] deleteAllConversations
 - [x] deleteUser
 
 
-- [x] implicitLastActive
+- [x] implicit last active based on any requests as auth user
+  
+- [x] custom middleware for implicit requesting user from auth code
+- [x] custom req logger middleware
+- [x] custom auth enforcement middleware
+- [x] implicit gcloud user from gcloud CLI
+- [x] load secrets from google secret manager
