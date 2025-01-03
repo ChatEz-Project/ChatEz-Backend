@@ -12,6 +12,8 @@
 #### Running:
 - (first time) `npm install`
 - Start local server `NODE_ENV=dev nodemon .`
+  - Sometimes nodemon wont work, in this case do:
+    - `sudo npm install -g --force nodemon`
 - Stop local server with `Ctrl+C`
 - Force stop local server: `sudo kill -9 $(lsof -ti :8080)`
 
