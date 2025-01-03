@@ -11,7 +11,9 @@
 
 #### Running:
 - (first time) `npm install`
-- Start local server `NODE_ENV=dev nodemon .`
+- Start local server
+  -- Linux: `NODE_ENV=dev nodemon .`
+  -- Windows: `$env:NODE_ENV="dev"; nodemon .`
 - Stop local server with `Ctrl+C`
 - Force stop local server: `sudo kill -9 $(lsof -ti :8080)`
 
