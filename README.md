@@ -14,6 +14,7 @@
 - Start local server
   - Linux: `NODE_ENV=dev nodemon .`
   - Windows: `$env:NODE_ENV="dev"; nodemon .`
+  - if nodemon does not work use `sudo npm install -g --force nodemon`
 - Stop local server with `Ctrl+C`
 - Force stop local server: `sudo kill -9 $(lsof -ti :8080)`
 
